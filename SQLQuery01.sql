@@ -140,7 +140,7 @@ CREATE TABLE Inventory
 	TavernID INT,
 	Date DATETIME DEFAULT CURRENT_TIMESTAMP,
 	Count INT,
-	PRIMARY KEY (supplyID,TavernID),
+	PRIMARY KEY (SupplyID,TavernID)
 	
 );
 --END CREATE A TABLE FOR Inventory
@@ -223,21 +223,22 @@ INSERT INTO ServiceStatuses (Name)
 -- END SEEDING --
 --  CREATE A TABLE FOR  Services.
 DROP TABLE IF EXISTS Services;
-CREATE TABLE services
+CREATE TABLE Services
 (
 	ID INT IDENTITY(1,1),
 	Name Varchar (150),
 	StatusID INT,
+	TavernID INT,
 	PRIMARY KEY (ID)
 );
 -- END CREATE A TABLE FOR  services.
 --SEEDING --
-INSERT INTO	services (Name,StatusID)
-		VALUES ('Pool',1),
-				('Weapon sharpening',1),
-				('service3',2),
-				('service4',4),
-				('service5',3)
+INSERT INTO	services (Name,StatusID,TavernID)
+		VALUES ('Pool',1,1),
+				('Weapon sharpening',1,1),
+				('service3',2,1),
+				('service4',4,2),
+				('service5',3,3)
 -- END SEEDING --
 --  CREATE A TABLE FOR  Sales
 DROP TABLE IF EXISTS Sales;
@@ -265,3 +266,129 @@ INSERT INTO Sales (ServiceID,GuestID,Price,AmmountPurchased,TaverenID)
 -- END SEEDING --
 GO
 							----------END  Assignment 1 --------
+
+
+							---------- Assignment 2 --------
+
+--  CREATE A TABLE FOR  GuestStatus.
+DROP TABLE IF EXISTS GuestStatus;
+CREATE TABLE GuestStatus
+(
+	ID INT IDENTITY(1,1),
+	Name Varchar(15),
+	PRIMARY KEY (ID)
+);
+-- END CREATE A TABLE FOR  ClassLevel.
+-- SEEDING ---
+INSERT INTO GuestStatus(Name)
+			VALUES ('sick'), 
+					('fine'), 
+					('hangry'), 
+					('raging'), 
+					('placid');
+-- END SEEDING --
+--  CREATE A TABLE FOR  Classes.
+DROP TABLE IF EXISTS Classes;
+CREATE TABLE Classes
+(
+	ID INT IDENTITY(1,1),
+	ClaseName Varchar(15),
+	PRIMARY KEY (ID)
+);
+-- END CREATE A TABLE FOR  Classes.
+-- SEEDING ---
+INSERT INTO Classes(ClaseName)
+			VALUES ('mage'),
+			('fighter'),
+			('Warrior'),
+			('VIP');
+-- END SEEDING --
+
+--  CREATE A TABLE FOR  Guests.
+DROP TABLE IF EXISTS Guests;
+CREATE TABLE Guests
+(
+	ID INT IDENTITY (1,1),
+	Name varchar(250),
+	Birthday Date,
+	cakedays Date, 
+	Notes Varchar(MAX),
+	StatusID INT,
+	PRIMARY KEY (ID)
+);
+---- END CREATE A TABLE FOR  Guests.
+---- SEEDING ---
+
+
+INSERT INTO Guests (Name,StatusID,Birthday)
+			VALUES ('Shahid Cannon',1,'1/21/1990'),
+					('Hawwa Skinner',1,'2/03/1995'),
+					('Anis Huerta',2,'01/01/1980'),
+					('Coby Bains',3,'12/07/1956'),
+					('Calum Coombes',1,'1/12/1947'),
+					('Otto Hancock',1,'6/05/2005'),
+					('Felix Odonnell',1,'6/05/2001'),
+					('Dionne Jones',5,'6/05/2000'),
+					('Halimah Walsh',4,'6/05/1963'),
+					('Oakley Gomez',1,'6/05/1954'),
+					('Kacy Craig',3,'6/05/1995'),
+					('Parris O''Reilly',1,'6/05/1946'),
+					('Donte Stephens',2,'5/05/1937');
+---- END SEEDING --
+
+--  CREATE A TABLE FOR  ClassLevel.
+DROP TABLE IF EXISTS GuestLevel;
+CREATE TABLE GuestLevel
+(
+	ID INT IDENTITY(1,1),
+	GuestID INT,
+	ClassID INT,
+	CLevel INT,
+	PRIMARY KEY (ID)
+);
+-- END CREATE A TABLE FOR  ClassLevel.
+-- SEEDING ---
+INSERT INTO GuestLevel(GuestID,ClassID,CLevel)
+		Values (1,1,3) ,  --(Guest1,mage,3)--
+				(2,1,5);
+-- END SEEDING --
+
+				--------------------------------------------
+				-----------ADDING FORGEN KEYS---------------
+				--------------------------------------------
+--ALTER TABLE Locations ADD FOREIGN KEY (StateID) References States(ID);
+ALTER TABLE Taverns ADD FOREIGN KEY (LocationID) References Locations(ID);
+ALTER TABLE Taverns ADD FOREIGN KEY (OwnerID) References Users(ID);
+ALTER TABLE Users ADD FOREIGN KEY (RoleID) References Roles(ID);
+ALTER TABLE Inventory ADD FOREIGN KEY (TavernID) References Taverns(ID);
+ALTER TABLE Inventory ADD FOREIGN KEY (SupplyID) References Supplies(ID);
+ALTER TABLE Tavern_Received ADD FOREIGN KEY (TavernID) References Taverns(ID);
+ALTER TABLE Tavern_Received ADD FOREIGN KEY (SupplyID) References Supplies(ID);
+ALTER TABLE Services ADD FOREIGN KEY (StatusID) References ServiceStatuses(ID);
+ALTER TABLE Services ADD FOREIGN KEY (TavernID) References Taverns(ID);
+ALTER TABLE Sales ADD FOREIGN KEY (ServiceID) References Services(ID);   --(ServiceID,GuestID,Price,AmmountPurchased,TaverenID)
+ALTER TABLE Sales ADD fOREIGN KEY (GuestID) References Guests(ID);
+ALTER TABLE Sales ADD FOREIGN KEY (TaverenID) References Taverns(ID);
+ALTER TABLE Guests ADD FOREIGN KEY (StatusID) References GuestStatus(ID);
+ALTER TABLE GuestLevel ADD FOREIGN KEY (GuestID) References Guests(ID);-----GuestLevel(GuestID,ClassID,CLevel)*****
+ALTER TABLE GuestLevel ADD FOREIGN KEY (ClassID) References Classes(ID);
+				--------------------------------------------
+				-------END ADDING FORGEN KEYS---------------
+				--------------------------------------------
+
+DROP TABLE IF EXISTS Service_Supply;
+CREATE TABLE Service_Supply
+(
+	ID INT IDENTITY (1,1),
+	ServiceID INT FOREIGN KEY References Services(ID),
+	SupplyID INT FOREIGN KEY References Supplies(ID),
+);
+DROP TABLE IF EXISTS Supply_Sale;
+CREATE TABLE Supply_Sale
+(
+	ID INT IDENTITY (1,1),
+	SaleID INT FOREIGN KEY References Sales(ID),
+	SupplyID INT FOREIGN KEY References Supplies(ID),
+);
+
+							----------END Assignment 2 --------
