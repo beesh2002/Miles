@@ -391,4 +391,63 @@ CREATE TABLE Supply_Sale
 	SupplyID INT FOREIGN KEY References Supplies(ID),
 );
 
+DROP TABLE IF EXISTS Service_Sale;
+CREATE TABLE Service_Sale
+(
+	ID INT IDENTITY (1,1),
+	ServiceID INT FOREIGN KEY References Services(ID),
+	SaleID INT FOREIGN KEY References Sales(ID),
+	TavernId INT FOREIGN KEY References Taverns(ID)
+
+);
+
 							----------END Assignment 2 --------
+-------------------------------Assignmment 3 --------------------
+DROP TABLE IF EXISTS RoomStatus;
+CREATE TABLE RoomStatus
+(
+	ID INT IDENTITY(1,1),
+	Name Varchar(50),
+	PRIMARY KEY (ID)
+
+);
+INSERT INTO RoomStatus (Name)
+		VALUES ('Available'),('Occupied');
+
+--@CREATING A table for rooms 
+DROP TABLE IF EXISTS Rooms;
+CREATE TABLE Rooms 
+(
+	ID INT IDENTITY (1,1),
+	RoomNumber INT,
+	RStatus INT References RoomStatus(ID), 
+	TavernID INT References Taverns(ID),
+
+	PRIMARY KEY (ID),
+);
+
+--End room table 
+--SEEDING
+INSERT INTO Rooms(RoomNumber,RStatus,TavernID)
+		VALUES (1,2,1),(2,2,1),(3,2,1),(4,2,1),(1,2,2),(2,1,2),(3,2,2),(4,2,2),(1,2,4),(2,2,4),(3,2,4),(4,2,4);
+GO
+------------------------
+--@CREATE TABLE TO TRACK rooms and the stays 
+DROP TABLE IF EXISTS Stays;
+CREATE TABLE Stays
+(
+	 ID INT IDENTITY (1,1),
+	 Rate Decimal(18,2),
+	 SaleID INT References Sales(ID),
+	 GuestID INT References Guests(ID),
+	 RoomID INT References Rooms(ID),
+	 DateStay Date,
+	 PRIMARY KEY (ID),
+);
+
+--END ROOMSTAY 
+--SEEDING 
+INSERT INTO Stays(Rate,SaleID,GuestID,RoomID,DateStay)
+		VALUES (12,1,1,1,'01/01/2021'),(20,2,3,3,'01/05/2021'),(10,3,4,2,'06/05/2021');
+GO
+--END Design of the Databese 
