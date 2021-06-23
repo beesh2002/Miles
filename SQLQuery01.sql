@@ -422,7 +422,6 @@ CREATE TABLE Rooms
 	RoomNumber INT,
 	RStatus INT References RoomStatus(ID), 
 	TavernID INT References Taverns(ID),
-
 	PRIMARY KEY (ID),
 );
 
@@ -446,8 +445,72 @@ CREATE TABLE Stays
 );
 
 --END ROOMSTAY 
---SEEDING 
 INSERT INTO Stays(Rate,SaleID,GuestID,RoomID,DateStay)
 		VALUES (12,1,1,1,'01/01/2021'),(20,2,3,3,'01/05/2021'),(10,3,4,2,'06/05/2021');
 GO
---END Design of the Databese 
+								--END Design of the Databese 
+
+
+
+--SQL QUERIES 
+Go
+--Write a query that returns guests with a birthday before 2000.
+SELECT * From Guests 
+WHERE Birthday < '01/01/2000';
+
+--Write a query to return rooms that cost more than 100 gold a night.
+SELECT RoomNumber, TavernID, Rate From Rooms JOIN Stays ON Rooms.ID=Stays.RoomID
+WHERE Rate>10;
+
+--Write a query that returns UNIQUE guest names
+SELECT DISTINCT Name FROM Guests;
+
+
+--Write a query that returns all guests ordered by name
+SELECT Name FROM Guests
+ORDER BY Name ASC;
+
+
+--Write a query that returns the top 10 highest price sales
+SELECT TOP (3) * FROM Sales ORDER BY Price DESC;
+
+--Write a query to return all the values stored in all Lookup Tables ????
+
+
+
+--Write a query that returns Guest Classes with Levels 
+SELECT CLevel, ClaseName, Name,
+CASE  
+WHEN CLevel BETWEEN 1 AND 10 THEN '1-10'
+WHEN CLevel BETWEEN 11 AND 20 THEN '11-20'
+ELSE  '21+'
+END 
+As 'Group'
+FROM GuestLevel 
+JOIN Classes ON Classes.ID = GuestLevel.id
+JOIN guests on guests.ID = GuestLevel.ID 
+
+
+
+--Write a series of INSERT commands that will insert the statuses of one table into another of your choosing using SELECT statements
+SELECT CONCAT ('INSERT INTO ',TABLE_NAME,' (name, ID)') AS InsertCommands
+FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'taverns'
+UNION ALL
+SELECT CONCAT ('VALUES (', (SELECT Name FROM guests WHERE ID = 1),', ',(SELECT ID FROM guests WHERE ID = 1), ' )')
+UNION ALL
+SELECT CONCAT ('INSERT INTO ',TABLE_NAME,' (name, ID)') AS InsertCommands
+FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'taverns'
+UNION ALL
+SELECT CONCAT ('(', (SELECT Name FROM guests WHERE ID = 2),', ',(SELECT ID FROM guests WHERE ID = 2), ' )')
+UNION ALL
+SELECT CONCAT ('INSERT INTO ',TABLE_NAME,' (name, ID)') AS InsertCommands
+FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'taverns'
+UNION ALL
+SELECT CONCAT ('(', (SELECT Name FROM guests WHERE ID = 3),', ',(SELECT ID FROM guests WHERE ID = 3), ' )')
+UNION ALL
+SELECT CONCAT ('INSERT INTO ',TABLE_NAME,' (name, ID)') AS InsertCommands
+FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'taverns'
+UNION ALL
+SELECT CONCAT ('(', (SELECT Name FROM guests WHERE ID = 4),', ',(SELECT ID FROM guests WHERE ID = 4), ' )')
+
+
