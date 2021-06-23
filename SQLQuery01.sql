@@ -402,7 +402,7 @@ CREATE TABLE Service_Sale
 );
 
 							----------END Assignment 2 --------
--------------------------------Assignmment 3 --------------------
+							----------Assignmment 3 -----------
 DROP TABLE IF EXISTS RoomStatus;
 CREATE TABLE RoomStatus
 (
@@ -512,5 +512,72 @@ SELECT CONCAT ('INSERT INTO ',TABLE_NAME,' (name, ID)') AS InsertCommands
 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'taverns'
 UNION ALL
 SELECT CONCAT ('(', (SELECT Name FROM guests WHERE ID = 4),', ',(SELECT ID FROM guests WHERE ID = 4), ' )')
+							----------END Assignment 3 --------
+							----------Assignmment 4 -----------
+
+--1.Write a query to return users who have admin roles
+SELECT * FROM Users
+WHERE RoleID=2;
+ --OR A Better VIEW 
+ SELECT Name, Discription FROM Users,Roles
+ WHERE Users.RoleID=Roles.ID AND RoleName='Admin';
+ --
+
+ --
+ 
+ --2.Write a query to return users who have admin [OWNER] roles and information about their taverns
+SELECT Users.Name AS 'Owner Name', Taverns.Name AS 'Tavern Name' ,  CONCAT (Discription,' ',Taverns.Name) AS Discription 
+FROM Users,Roles,Taverns 
+WHERE Roles.id=Users.RoleID AND RoleName='Owner' AND Taverns.OwnerID = Users.ID  
+--
+ SELECT Users.Name as 'Owner Name', Taverns.Name as'Tavern Name'  FROM Taverns
+ Join Users on Taverns.OwnerID=Users.id order by Users.Name
+
+ --
+  SELECT Users.Name as 'Owner Name', Taverns.Name as'Tavern Name' , Locations.Name AS 'Location'  FROM Taverns
+  Join Users on Taverns.OwnerID=Users.id 
+  Join Locations on LocationID= Locations.ID
+ order by Users.Name
+
+ --3. Write a query that returns all guests ordered by name (ascending) and their classes and corresponding levels
+ SELECT  Guests.Name AS 'Guest Name',Birthday,Classes.ClaseName AS 'Class Name' , CLevel AS 'Level' FROM Guests
+LEFT JOIN GuestLevel on GuestLevel.GuestID=Guests.ID
+ LEFT JOIN Classes on GuestLevel.ClassID=Classes.ID
+ ORDER BY Guests.Name
+ 
+ --4.Write a query that returns the top 10 sales in terms of sales price and what the services were
+ SELECT Guests.Name AS 'Guest Name', Services.Name AS 'Service Name', AmmountPurchased AS 'Ammount', Price AS 'Total' FROM Sales
+ LEFT JOIN Services on Sales.ServiceID= Services.ID
+ LEFT JOIN Guests on Sales.GuestID=Guests.ID
+
+ --5.Write a query that returns guests with 2 or more classes
 
 
+SELECT Guests.Name As 'Name', T.Counts As'Number of Classes' From Guests
+JOIN(
+
+SELECT GuestLevel.GuestID, COUNT(GuestID) AS 'Counts' FROM GuestLevel
+Group by GuestID
+HAVING COUNT(ClassID)>1) AS T on T.GuestID=Guests.ID
+
+--6.Write a query that returns guests with 2 or more classes with levels higher than 5
+
+ SELECT Guests.Name As 'Name', T.Counts As'Number of Classes' From Guests
+JOIN(
+
+SELECT T.GuestID, COUNT(T.GuestID) AS 'Counts' FROM (SELECT GuestLevel.GuestID, GuestLevel.ClassID FROM GuestLevel
+WHERE CLevel>4)AS T
+Group by GuestID
+HAVING COUNT(ClassID)>1) AS T on T.GuestID=Guests.ID
+
+--7.Write a query that returns guests with ONLY their highest level class
+SELECT Guests.Name AS 'Name',T.[Max Level] From ( SELECT GuestLevel.GuestID As 'ID',MAX(GuestLevel.CLevel) AS 'Max Level' From GuestLevel
+Group BY GuestLevel.GuestID)AS T 
+JOIN Guests on Guests.id= t.ID
+
+
+--8.
+
+--9.
+
+										----------END Assignment 4 --------
