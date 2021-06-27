@@ -479,7 +479,7 @@ SELECT TOP (3) * FROM Sales ORDER BY Price DESC;
 
 
 --Write a query that returns Guest Classes with Levels 
-SELECT CLevel, ClaseName, Name,
+SELECT  Guests.Name ClaseName,
 CASE  
 WHEN CLevel BETWEEN 1 AND 10 THEN '1-10'
 WHEN CLevel BETWEEN 11 AND 20 THEN '11-20'
@@ -487,9 +487,8 @@ ELSE  '21+'
 END 
 As 'Group'
 FROM GuestLevel 
-JOIN Classes ON Classes.ID = GuestLevel.id
-JOIN guests on guests.ID = GuestLevel.ID 
-
+JOIN guests on guests.ID = GuestLevel.GuestID 
+JOIN Classes ON Classes.ID = GuestLevel.ClassID
 
 
 --Write a series of INSERT commands that will insert the statuses of one table into another of your choosing using SELECT statements
@@ -576,8 +575,105 @@ Group BY GuestLevel.GuestID)AS T
 JOIN Guests on Guests.id= t.ID
 
 
---8.
-
+--8.Write a query that returns guests that stay within a date range
+SELECT * FROM Stays
+WHERE (DateStay  Between '2021-01-01' AND '2021-01-30');
 --9.
 
 										----------END Assignment 4 --------
+										---------- Assignment 5 --------
+
+--1.Write a query to return a “report” of all users and their roles
+SELECT users.Name AS 'Name', Roles.RoleName  AS ' Role', Discription FROM Users
+LEFT JOIN Roles ON Roles.ID=Users.RoleID
+
+
+--2.Write a query to return all classes and the count of guests that hold those classes
+SELECT Classes.ClaseName AS 'Class Name', T.Count AS ' Count' FROM Classes
+JOIN (SELECT GuestLevel.ClassID,COUNT(ClassID) as'Count' FROM GuestLevel
+group by ClassID) AS T ON T.ClassID=Classes.ID;
+
+
+--3.Write a query that returns all guests ordered by name (ascending) and their classes and corresponding levels.
+--Add a column that labels them beginner (lvl 1-5), intermediate (5-10) and expert (10+) for their classes (Don’t alter the table for this)
+
+SELECT  Guests.Name, ClaseName AS ' Class', CLevel,
+CASE  
+WHEN CLevel BETWEEN 1 AND 5 THEN 'Beginner'
+WHEN CLevel BETWEEN 5 AND 10 THEN 'Intermediate'
+ELSE  'Expert'
+END 
+As 'Label'
+FROM GuestLevel 
+JOIN guests on guests.ID = GuestLevel.GuestID 
+JOIN Classes ON Classes.ID = GuestLevel.ClassID
+ORDER BY Guests.Name
+--4.Write a function that takes a level and returns a “grouping” from question 3 (e.g. 1-5, 5-10, 10+, etc)
+USE MTTDB;
+
+
+IF OBJECT_ID (N'dbo.GetLevel', N'FN') IS NOT NULL  
+    DROP FUNCTION GetLevel;  
+GO  
+CREATE FUNCTION dbo.GetLevel(@input int)  
+RETURNS varchar(101)
+AS   
+BEGIN  
+   DECLARE @ret varchar(101);  
+		IF @input BETWEEN 1 AND 5  SET @ret= 'Beginner'
+		ELSE
+		IF @input BETWEEN 5 AND 10 SET @ret= 'Intermediate'
+		ELSE  SET @ret= 'Expert'
+
+    RETURN @ret;  
+END; 
+GO
+
+
+SELECT Guests.Name, Classes.ClaseName ,CLevel,dbo.GetLevel(GuestLevel.CLevel) FROM GuestLevel
+JOIN Guests ON Guests.ID=GuestLevel.GuestID
+JOIN Classes ON GuestLevel.ClassID=Classes.ID
+ORDER BY Guests.Name
+GO
+
+--5.Write a function that returns a report of all open rooms (not used) on a particular day (input) and which tavern they belong to 
+IF OBJECT_ID (N'dbo.GetOpenRoomsReport', N'IF') IS NOT NULL  
+    DROP FUNCTION GetOpenRoomsReport;  
+GO  
+CREATE FUNCTION dbo.GetOpenRoomsReport(@input Date)
+RETURNS TABLE
+AS   
+RETURN 
+   
+		SELECT Taverns.Name AS 'Tavern Name', Rooms.RoomNumber FROM Rooms
+			JOIN Taverns ON Rooms.TavernID=Taverns.ID
+			WHERE Rooms.ID<>(
+			SELECT RoomID FROM Stays
+			WHERE Stays.DateStay =@input)
+      
+GO
+
+Select * from dbo.GetOpenRoomsReport('2021-01-05')
+
+--Modify the same function from 5 to instead return a report of prices in a range (min and max prices) 
+-- Return Rooms and their taverns based on price inputs
+
+
+IF OBJECT_ID (N'dbo.GetRoomRange', N'IF') IS NOT NULL  
+    DROP FUNCTION GetRoomRange;  
+GO  
+CREATE FUNCTION dbo.GetRoomRange(@min Decimal, @max Decimal)
+RETURNS TABLE
+AS   
+RETURN 
+   
+		SELECT Taverns.Name AS 'Tavern Name', Rooms.RoomNumber, t.Rate FROM Rooms
+		JOIN (
+			SELECT Stays.Rate, Stays.RoomID FROM Stays
+			WHERE Stays.Rate BETWEEN @min AND @max)AS T ON t.RoomID=Rooms.ID
+			JOIN Taverns ON Rooms.TavernID=Taverns.ID
+			WHERE Rooms.ID= T.RoomID
+      
+GO
+
+Select * from dbo.GetRoomRange(0,15)
